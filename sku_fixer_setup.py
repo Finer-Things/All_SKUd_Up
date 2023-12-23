@@ -11,18 +11,18 @@ incorrect_sku_column_name = "SKU"
 correct_sku_column_name = "New SKU"
 
 # SKUs that need to be corrected
-messed_up_skus_filename = "data/Messed Up SKUS 2022.csv"
+messed_up_skus_filename = "data/SKUs 10-2023.csv"
 messed_up_sku_column_name = "SKU"
 
 
 
 # Create the master_sku_list and corrected_sku_dict Functions
-def make_master_sku_list():
+def make_master_sku_list(master_sku_filename = master_sku_filename):
     m_df = pd.read_csv(master_sku_filename).dropna(how="all")
     master_sku_list = list(m_df[master_sku_column_name].astype(str).str.strip().unique())
     return master_sku_list
 
-def make_corrected_sku_dict():
+def make_corrected_sku_dict(corrected_skus_filename = corrected_skus_filename):
     c_df = pd.read_csv(corrected_skus_filename)[[incorrect_sku_column_name, correct_sku_column_name]].dropna(how="any")
     corrected_sku_dict = pd.Series(c_df[correct_sku_column_name].astype(str).str.strip().values,index=c_df[incorrect_sku_column_name]).to_dict()
     return corrected_sku_dict
