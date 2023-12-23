@@ -1,0 +1,5 @@
+{
+    "master_sku_list": "../data/MASTER LIST STRAP SKUS 2022 REVISED.csv",
+    "corrected_sku_list": "../data/Messed Up SKUS 2022 Fixed.xlsx",
+    "skus_to_correct": "../data/SKUs 10-2023.csv"
+}
