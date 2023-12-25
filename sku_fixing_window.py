@@ -80,7 +80,11 @@ class SkuFixingWindow(QWidget):
                     df = pd.read_csv(filename)
                 else:
                     df = pd.read_excel(filename)
-
+                # In the line below, the dataframe is saved as an attribute. 
+                # It's in memory anyway, and we might as well keep it for later. 
+                # Note: This is set repeatedly, but variable assignments don't take very long and the last one will stick. 
+                self.messed_up_skus_df = df
+                
                 self.qcombo = self.file_of_skus_to_fix_column_names
                 self.qcombo.addItems(df.columns)
                 # In the lookup dict below (qcombo_index_lookup_dict), the range is indexed backwards so that 
@@ -92,13 +96,13 @@ class SkuFixingWindow(QWidget):
                     self.qcombo.setCurrentIndex(scn_index)
                 elif self.qcombo.count() > 0:
                     self.qcombo.setCurrentIndex(0)
-                
-                ##### Still left to do: find the right place to save the selected dropdown item in the QComboBox.
-                    # This will require its own method and it needs to be triggered on qcb.changeItem (or some method like that)
+
 
     @pyqtSlot()
     def save_skus_to_fix_column_name(self):
-        self.file_info_dictionary["messed_up_skus_column_name"] = self.file_of_skus_to_fix_column_names.currentText()
+        # The messed up skus column name is saved here. 
+        self.messed_up_skus_column_name = self.file_of_skus_to_fix_column_names.currentText()
+        self.file_info_dictionary["messed_up_skus_column_name"] = self.messed_up_skus_column_name
         
         with open(self.sku_records_filename, "w") as write_file:
             json.dump(self.file_info_dictionary, write_file, indent=4)
@@ -133,6 +137,14 @@ class SkuFixingWindow(QWidget):
                                                                         self.correct_skus_column_name
                                                                         )
         sku_operator.make_sku_dict()
+
+        
+        messed_up_skus = list(self.messed_up_skus_df[self.messed_up_skus_column_name])
+        predictions = sku_operator.predict_skus(messed_up_skus)
+        self.sku_prediction_df = pd.DataFrame({"Incorrect Keys": self.messed_up_skus_df[self.messed_up_skus_column_name], "Predicted Keys": predictions})
+
+        # Launch a new window with this dataframe. 
+        
 
             
             

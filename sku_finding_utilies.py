@@ -8,7 +8,7 @@ from Levenshtein import distance as lev
 class SKUOperator():
     def __init__(self, prediction_function):
         self.prediction_function = prediction_function
-        self.cashed_predictor = CachedPredictor(self.prediction_function)
+        self.cached_predictor = CachedPredictor(self.prediction_function)
 
     def get_master_skus_list(self, master_skus_filename: str, master_skus_column_name: str)->None:
         """
@@ -56,16 +56,32 @@ class SKUOperator():
         if hasattr(self, "master_skus_list") and hasattr(self, "corrected_skus_dict"):
             self.sku_dict = self.corrected_skus_dict | {sku: sku for sku in self.master_skus_list}
         else:
-            first_exception_line = 'The SKUOperator object must have both a "master_skus_list" and a "corrected_skus_dict" attribute.'
+            top_line_of_exception_message = 'The SKUOperator object must have both a "master_skus_list" and a "corrected_skus_dict" attribute.'
             if hasattr(self, "corrected_skus_dict"):
-                raise Exception(first_exception_line + '\nThe attribute "master_skus_list" is missing.')
+                raise Exception(top_line_of_exception_message + '\nThe attribute "master_skus_list" is missing.')
             elif hasattr(self, "master_skus_list"):
-                raise Exception(first_exception_line + '\nThe attribute "corrected_skus_dict" is missing.')
+                raise Exception(top_line_of_exception_message + '\nThe attribute "corrected_skus_dict" is missing.')
             else:
-                raise Exception(first_exception_line + "\nBoth attributes are missing.")
+                raise Exception(top_line_of_exception_message + "\nBoth attributes are missing.")
+            
+        if not self.sku_dict:
+            raise Exception("""The master sku list and corrected sku dictionary are both empty. We cannot make predictions with no 
+                            data to base the predictions on.""")
+        
+        self.cached_predictor.update(self.sku_dict)
+            
+    def predict_skus(self, sku_list):
+        """
+        Uses the CashedPredictor class to make and record predictions. Adds a predictions dataframe attribute. 
+        """
+        if not hasattr(self, sku_dict):
+            raise Exception("You must call the methods get_master_skus_list, _get_corrected_skus_dict, and make_sku_dict before predicting.")
+        return [self.cached_predictor[sku] for sku in sku_list]
+
+
+
     
-    ##### I was going to give this parameters, check that self has a master_skus_list, a corrected_skus_dict and sku_dict
-            # and then feed either the skus to be corrected filename and column name (or the df if they're handy) into this method. 
+    ##### 
             # This class already has a CachedPredictor, so we can create a dataframe with two columns: The keys/values of the 
             # CachedPredictor's previous_predictions dictionary. The next step in the sku_fixing_window is to launch a window with a 
             # dataframe of these and allow the user to update them, adding the key/value pairs to self.corrected_skus_dict and saving. 
@@ -73,10 +89,7 @@ class SKUOperator():
             # ***Note: Should we re-enable the run button, in case the user deletes some of the rows in the dataframe? Maybe also erase 
             # the previous_prediction dictionary on saving. --That's probably a good idea. Good night! ...and sorry for all the bugs I 
             # left future me with! 
-    # def predict_skus(self, ):
-    #     """
-    #     Uses the CashedPredictor class to make and record predictions. 
-    #     """
+    
 
 
 
