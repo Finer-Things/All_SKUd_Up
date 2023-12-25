@@ -8,7 +8,7 @@ from Levenshtein import distance as lev
 class SKUOperator():
     def __init__(self, prediction_function):
         self.prediction_function = prediction_function
-        self.cashed_predictor = CachedPredictor(prediction_function)
+        self.cashed_predictor = CachedPredictor(self.prediction_function)
 
     def get_master_skus_list(self, master_skus_filename: str, master_skus_column_name: str)->None:
         """
@@ -111,7 +111,7 @@ class CachedPredictor(dict):
 
 
 
-############## Helper Functions ################
+############## Helper Functions from the Last Version ################
 def comp_dist(x, y):
     # Returns the Levenshtein Distance between two strings, ignoring dashes and spaces
     x_stripped, y_stripped = str(x).replace(" ", "").replace("-", ""), str(y).replace(" ", "").replace("-", "")

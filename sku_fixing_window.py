@@ -2,7 +2,7 @@ from PyQt6.QtWidgets import QApplication, QWidget, QPushButton, QLineEdit,  QChe
 from PyQt6.QtWidgets import QHBoxLayout, QFileDialog, QDialog, QDialogButtonBox, QVBoxLayout, QLabel, QMainWindow, QSlider, QTextBrowser
 from PyQt6.QtCore import pyqtSlot, QTimer, pyqtSignal, Qt
 from PyQt6.QtGui import QPalette, QColor
-from sku_finding_utilies import SKUOperator
+from sku_finding_utilies import SKUOperator, comp_dist
 import json
 import os.path
 import pandas as pd
@@ -124,7 +124,7 @@ class SkuFixingWindow(QWidget):
         for file_info_piece in self.file_info_dictionary.keys():
             setattr(self, file_info_piece, self.file_info_dictionary[file_info_piece])
 
-        sku_operator = SKUOperator()
+        sku_operator = SKUOperator(comp_dist)
         sku_operator.get_master_skus_list(self.master_skus_filename, 
                                                                   self.master_skus_column_name
                                                                   )
@@ -132,7 +132,7 @@ class SkuFixingWindow(QWidget):
                                                                         self.incorrect_skus_column_name, 
                                                                         self.correct_skus_column_name
                                                                         )
-        self.make_sku_dict()
+        sku_operator.make_sku_dict()
 
             
             
