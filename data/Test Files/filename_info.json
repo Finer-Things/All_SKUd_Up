@@ -1,0 +1,9 @@
+{
+    "master_skus_filename": "data/TEST Master SKUs List.xlsx",
+    "master_skus_column_name": "Master SKU",
+    "corrected_skus_filename": "data/TEST Corrected SKUs List.xlsx",
+    "incorrect_skus_column_name": "Bad SKU",
+    "correct_skus_column_name": "Should Be",
+    "messed_up_skus_filename": "data/TEST Messed Up SKUs List.xlsx",
+    "messed_up_skus_column_name": "SKU"
+}

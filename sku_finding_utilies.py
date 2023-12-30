@@ -2,6 +2,7 @@ import os.path
 import pandas as pd
 import json
 from Levenshtein import distance as lev
+from types import FunctionType
 
 
 
@@ -31,8 +32,11 @@ class SKUOperator():
 
     def get_corrected_skus_dict(self, corrected_skus_filename: str, incorrect_skus_column_name: str, correct_skus_column_name: str)->None:
         """
-        Creates a dictionary with the corrected in it. 
+        Creates a dictionary with the previously corrected skus in it. 
         """
+        self.corrected_skus_filename = corrected_skus_filename
+        self.incorrect_skus_column_name = incorrect_skus_column_name
+        self.correct_skus_column_name = correct_skus_column_name
         _, file_extension = os.path.splitext(corrected_skus_filename)
         if file_extension == ".csv":
             c_df = pd.read_csv(corrected_skus_filename)[[incorrect_skus_column_name, correct_skus_column_name]].dropna(how="any")
@@ -74,10 +78,27 @@ class SKUOperator():
         """
         Uses the CashedPredictor class to make and record predictions. Adds a predictions dataframe attribute. 
         """
-        if not hasattr(self, sku_dict):
+        if not hasattr(self, "sku_dict"):
             raise Exception("You must call the methods get_master_skus_list, _get_corrected_skus_dict, and make_sku_dict before predicting.")
         return [self.cached_predictor[sku] for sku in sku_list]
 
+    def save_corrected_skus_dict(self, corrected_skus_dict: dict)->None:
+        """
+        Saves the dictionary of corrected skus in the two columns that were loaded.
+        """
+        corrected_skus_df = pd.DataFrame({self.incorrect_skus_column_name: list(corrected_skus_dict.keys()), self.correct_skus_column_name: [corrected_skus_dict[key] for key in corrected_skus_dict.keys()]})
+        _, file_extension = os.path.splitext(self.corrected_skus_filename)
+        if file_extension == ".csv":
+            corrected_skus_df.to_csv(self.corrected_skus_filename, index=False)
+        elif file_extension == ".xlsx":
+            corrected_skus_df.to_excel(self.corrected_skus_filename, index=False)
+        elif file_extension == ".json":
+            with open(corrected_skus_filename, "w") as write_file:
+                json.dump(self.corrected_skus_dict, write_file, indent=4)
+        else:
+            raise Exception("""The file name entered did not have an extension that was either .csv, .xlsx or .json.
+                            One of these three formats is required to establish a master sku list.""")        
+        self.corrected_skus_dict = corrected_skus_dict
 
 
     
@@ -108,8 +129,10 @@ class CachedPredictor(dict):
             if previous_prediction:
                 return previous_prediction
             else:
-                prediction = self.prediction_function(key)
-                self.predictions[key] = prediction
+                # Finds the closest key and then returns the output of that key. 
+                prediction = self.get(find_closest_sku(key, list(self.keys()), self.prediction_function))
+                # self.prediction_function(key)
+                self.previous_predictions[key] = prediction
                 return prediction
 
 
@@ -130,10 +153,10 @@ def comp_dist(x, y):
     x_stripped, y_stripped = str(x).replace(" ", "").replace("-", ""), str(y).replace(" ", "").replace("-", "")
     return lev(x_stripped, y_stripped)
 
-def find_closest_sku(bad_sku, master_sku_list: list)-> str:
+def find_closest_sku(bad_sku, target_sku_list: list, distance_function: FunctionType = comp_dist)-> str:
     # Returns the closest approved sku using comp_dist as a metric. 
     bad_sku = str(bad_sku)
-    sorted_master_sku_list = sorted(master_sku_list, key = lambda sku: comp_dist(sku, bad_sku))
+    sorted_master_sku_list = sorted(target_sku_list, key = lambda sku: distance_function(sku, bad_sku))
     corrected_sku = sorted_master_sku_list[0]
     return corrected_sku
 

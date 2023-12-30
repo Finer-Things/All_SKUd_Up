@@ -1,0 +1,9 @@
+{
+    "master_skus_filename": "data/MASTER LIST STRAP SKUS 2022 REVISED.csv",
+    "master_skus_column_name": "SKU",
+    "corrected_skus_filename": "data/SKUS LIST WITH CORRECTIONS.csv",
+    "incorrect_skus_column_name": "SKU",
+    "correct_skus_column_name": "New SKU",
+    "messed_up_skus_filename": "data/SKUs 10-2023.csv",
+    "messed_up_skus_column_name": "SKU"
+}
