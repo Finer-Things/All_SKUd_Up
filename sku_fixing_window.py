@@ -185,6 +185,11 @@ class SKUReviewWindow(QMainWindow):
         self.top_done_button.clicked.connect(self.done_correcting_skus)
         self.widget.setLayout(self.layout)
         self.layout.addRow("Correct all the predictions below.", self.top_done_button)
+        self.make_csv_button = QPushButton("Actually, I'll do this with a csv file.")
+        self.make_csv_button.clicked.connect(self.make_csv)
+        self.make_excel_button = QPushButton("Actually, I'll do this with an excel file.")
+        self.make_excel_button.clicked.connect(self.make_excel)
+        self.layout.addRow(self.make_csv_button, self.make_excel_button)
         for messed_up_sku in prediction_dict.keys():
             self.correction_qedit_dict[messed_up_sku] = QLineEdit(f"{prediction_dict[messed_up_sku]}")
             self.layout.addRow(f"{messed_up_sku}", self.correction_qedit_dict[messed_up_sku])
@@ -224,7 +229,31 @@ class SKUReviewWindow(QMainWindow):
 
         self.sku_fixing_window.close()
 
+    @pyqtSlot()
+    def make_csv(self):
+        prediction_dict = self.sku_fixing_window.sku_operator.cached_predictor.previous_predictions
+        df = pd.DataFrame({
+            "Incorrect SKU": list(prediction_dict.keys()), 
+            "Predicted SKU": list(prediction_dict.values())
+        })
+        df.to_csv("Manual SKU Correction File.csv", index=False)
+        self.close()
+        self.sku_fixing_window.close()
+        
 
+    @pyqtSlot()
+    def make_excel(self):
+        prediction_dict = self.sku_fixing_window.sku_operator.cached_predictor.previous_predictions
+        df = pd.DataFrame({
+            "Incorrect SKU": list(prediction_dict.keys()), 
+            "Predicted SKU": list(prediction_dict.values())
+        })
+        df.to_excel("Manual SKU Correction File.xlsx", index=False)
+        self.close()
+        self.sku_fixing_window.close()
+        
+
+    
 
 
 
